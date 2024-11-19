@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        label, input, select, button { display: block; margin-bottom: 10px; }
+        #questionsContainer { margin-top: 20px; }
+        #questionsContainer div { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<h2>Admin Page: Set Up Video and Questions</h2>
+
+<!-- Video Upload -->
+<label for="videoFile">Upload Video:</label>
+<input type="file" id="videoFile" accept="video/*" onchange="handleFileUpload(event)">
+
+<!-- Question Form -->
+<h3>Add Questions</h3>
+<label>Time (in seconds):</label>
+<input type="number" id="questionTime" min="0" placeholder="Enter time in seconds">
+
+<label>Question:</label>
+<input type="text" id="questionText" placeholder="Enter question text">
+
+<label>Option A:</label>
+<input type="text" id="optionA" placeholder="Enter option A">
+<label>Option B:</label>
+<input type="text" id="optionB" placeholder="Enter option B">
+<label>Option C:</label>
+<input type="text" id="optionC" placeholder="Enter option C">
+
+<label>Correct Answer:</label>
+<select id="correctAnswer">
+    <option value="A">A</option>
+    <option value="B">B</option>
+    <option value="C">C</option>
+</select>
+
+<button onclick="addQuestion()">Add Question</button>
+
+<div id="questionsContainer"></div>
+
+<button onclick="saveConfig()">Save Configuration</button>
+
+<script>
+    let questions = [];
+    let videoData = "";
+
+    // Function to handle video file upload and convert to Base64
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            videoData = e.target.result; // Store Base64 video data
+            alert("Video uploaded successfully!");
+        };
+
+        if (file) {
+            reader.readAsDataURL(file); // Convert video file to Base64
+        }
+    }
+
+    // Function to add a question
+    function addQuestion() {
+        const time = document.getElementById("questionTime").value;
+        const text = document.getElementById("questionText").value;
+        const optionA = document.getElementById("optionA").value;
+        const optionB = document.getElementById("optionB").value;
+        const optionC = document.getElementById("optionC").value;
+        const correct = document.getElementById("correctAnswer").value;
+
+        if (time && text && optionA && optionB && optionC) {
+            questions.push({
+                time: parseInt(time, 10),
+                question: text,
+                options: { A: optionA, B: optionB, C: optionC },
+                correctAnswer: correct
+            });
+            
+            displayQuestions();
+        } else {
+            alert("Please fill all fields for the question.");
+        }
+    }
+
+    // Display questions
+    function displayQuestions() {
+        const container = document.getElementById("questionsContainer");
+        container.innerHTML = "";
+        questions.forEach((q, index) => {
+            const div = document.createElement("div");
+            div.innerHTML = `<strong>Question ${index + 1}:</strong> ${q.question}<br>
+                             <em>Time:</em> ${q.time}s<br>
+                             <em>Options:</em> A) ${q.options.A} B) ${q.options.B} C) ${q.options.C}<br>
+                             <em>Correct Answer:</em> ${q.correctAnswer}`;
+            container.appendChild(div);
+        });
+    }
+
+    // Save configuration in local storage
+    function saveConfig() {
+        if (!videoData) {
+            alert("Please upload a video.");
+            return;
+        }
+        
+        const config = { videoData, questions };
+        localStorage.setItem("videoConfig", JSON.stringify(config));
+        alert("Configuration saved!");
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Page</title>
+    <style>
+        #videoPlayer { display: block; margin: 20px auto; }
+        #questionContainer { display: none; margin-top: 20px; padding: 20px; border: 1px solid #ccc; background-color: #f9f9f9; }
+        label { display: block; margin: 8px 0; }
+        button { padding: 8px 12px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<h2>User Page: Interactive Video</h2>
+
+<!-- Video Player -->
+<video id="videoPlayer" width="600" controls>
+    <source id="videoSource" type="video/mp4">
+</video>
+
+<!-- Question Container -->
+<div id="questionContainer">
+    <p id="questionText"></p>
+    <form id="answerForm">
+        <input type="radio" name="answer" value="A" id="optionA">
+        <label for="optionA" id="labelA"></label><br>
+        <input type="radio" name="answer" value="B" id="optionB">
+        <label for="optionB" id="labelB"></label><br>
+        <input type="radio" name="answer" value="C" id="optionC">
+        <label for="optionC" id="labelC"></label><br>
+        <button type="button" onclick="submitAnswer()">Submit Answer</button>
+    </form>
+</div>
+
+<script>
+    // Load video configuration from local storage
+    const config = JSON.parse(localStorage.getItem("videoConfig"));
+    const videoPlayer = document.getElementById("videoPlayer");
+    const videoSource = document.getElementById("videoSource");
+    const questionContainer = document.getElementById("questionContainer");
+    const questionText = document.getElementById("questionText");
+    const answerForm = document.getElementById("answerForm");
+
+    // Set video source
+    if (config && config.videoUrl) {
+        videoSource.src = config.videoUrl;
+        videoPlayer.load();
+    }
+
+    let currentQuestionIndex = 0;
+
+    // Display question at specified time
+    videoPlayer.ontimeupdate = function() {
+        if (currentQuestionIndex < config.questions.length) {
+            const question = config.questions[currentQuestionIndex];
+            if (Math.floor(videoPlayer.currentTime) === question.time) {
+                pauseAndShowQuestion(question);
+            }
+        }
+    };
+
+    function pauseAndShowQuestion(question) {
+        videoPlayer.pause();
+        questionContainer.style.display = 'block';
+        questionText.textContent = question.question;
+        document.getElementById('labelA').textContent = question.options.A;
+        document.getElementById('labelB').textContent = question.options.B;
+        document.getElementById('labelC').textContent = question.options.C;
+    }
+
+    function submitAnswer() {
+        questionContainer.style.display = 'none';
+        answerForm.reset();
+        currentQuestionIndex++;
+        videoPlayer.play();
+    }
+</script>
+
+</body>
+</html>
